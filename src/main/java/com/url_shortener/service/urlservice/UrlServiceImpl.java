@@ -1,15 +1,15 @@
-package com.url_shortner.service.urlservice;
+package com.url_shortener.service.urlservice;
 
 
-import com.url_shortner.dto.ShortenRequest;
-import com.url_shortner.dto.UrlResponse;
-import com.url_shortner.entity.Url;
-import com.url_shortner.exception.AliasAlreadyExistsException;
-import com.url_shortner.exception.ShortCodeGenerationException;
-import com.url_shortner.exception.ShortCodeNotFoundException;
-import com.url_shortner.exception.UrlExpiredException;
-import com.url_shortner.repository.UrlRepository;
-import com.url_shortner.util.ShortCodeGenerator;
+import com.url_shortener.dto.ShortenRequest;
+import com.url_shortener.dto.UrlResponse;
+import com.url_shortener.entity.Url;
+import com.url_shortener.exception.AliasAlreadyExistsException;
+import com.url_shortener.exception.ShortCodeGenerationException;
+import com.url_shortener.exception.ShortCodeNotFoundException;
+import com.url_shortener.exception.UrlExpiredException;
+import com.url_shortener.repository.UrlRepository;
+import com.url_shortener.util.ShortCodeGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

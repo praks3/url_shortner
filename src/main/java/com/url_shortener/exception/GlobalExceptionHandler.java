@@ -1,6 +1,6 @@
-package com.url_shortner.exception;
+package com.url_shortener.exception;
 
-import com.url_shortner.dto.ErrorResponse;
+import com.url_shortener.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

@@ -1,8 +1,8 @@
-package com.url_shortner.controller;
+package com.url_shortener.controller;
 
-import com.url_shortner.dto.ShortenRequest;
-import com.url_shortner.dto.UrlResponse;
-import com.url_shortner.service.urlservice.UrlService;
+import com.url_shortener.dto.ShortenRequest;
+import com.url_shortener.dto.UrlResponse;
+import com.url_shortener.service.urlservice.UrlService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

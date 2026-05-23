@@ -1,4 +1,4 @@
-package com.url_shortner.dto;
+package com.url_shortener.dto;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;

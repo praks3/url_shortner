@@ -1,4 +1,4 @@
-package com.url_shortner.dto;
+package com.url_shortener.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
