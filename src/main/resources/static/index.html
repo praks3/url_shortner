@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>URL Shortener</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header>
+    <h1>URL Shortener</h1>
+    <nav>
+        <button data-tab="shorten" class="tab-btn active">Shorten</button>
+        <button data-tab="my-urls" class="tab-btn auth-only" hidden>My URLs</button>
+        <button data-tab="auth" class="tab-btn anon-only">Login / Register</button>
+        <span class="who auth-only" hidden></span>
+        <button id="logout-btn" class="auth-only" hidden>Logout</button>
+    </nav>
+</header>
+
+<main>
+    <section id="shorten" class="tab active">
+        <h2>Shorten a URL</h2>
+        <form id="shorten-form">
+            <label>URL
+                <input name="url" type="url" required placeholder="https://example.com/long/path">
+            </label>
+            <label>Custom alias <span class="hint">(optional, 3-16 chars: a-z, 0-9, _, -)</span>
+                <input name="customAlias" pattern="[A-Za-z0-9_\-]{3,16}">
+            </label>
+            <label>Expires at <span class="hint">(optional)</span>
+                <input name="expiresAt" type="datetime-local">
+            </label>
+            <button type="submit">Shorten</button>
+        </form>
+        <div id="shorten-result" class="result" hidden></div>
+        <div id="shorten-error" class="error" hidden></div>
+    </section>
+
+    <section id="auth" class="tab">
+        <div class="auth-tabs">
+            <button class="auth-tab-btn active" data-auth="login">Login</button>
+            <button class="auth-tab-btn" data-auth="register">Register</button>
+        </div>
+
+        <form id="login-form" class="auth-form active">
+            <h2>Login</h2>
+            <label>Username <input name="username" required></label>
+            <label>Password <input name="password" type="password" required></label>
+            <button type="submit">Login</button>
+            <div class="error" hidden></div>
+        </form>
+
+        <form id="register-form" class="auth-form">
+            <h2>Register</h2>
+            <label>Username <input name="username" required pattern="[A-Za-z0-9_\-]{3,64}"></label>
+            <label>Email <input name="email" type="email" required></label>
+            <label>Password <input name="password" type="password" required minlength="8" maxlength="128"></label>
+            <button type="submit">Register</button>
+            <div class="error" hidden></div>
+        </form>
+    </section>
+
+    <section id="my-urls" class="tab">
+        <h2>My URLs</h2>
+        <button id="refresh-urls">Refresh</button>
+        <table id="urls-table">
+            <thead>
+            <tr>
+                <th>Short</th>
+                <th>Original</th>
+                <th>Created</th>
+                <th>Expires</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <p id="urls-empty" class="hint" hidden>No URLs yet. Shorten one and it'll appear here.</p>
+    </section>
+</main>
+
+<dialog id="stats-modal">
+    <h2>Stats <span class="hint" id="stats-for"></span></h2>
+    <dl id="stats-summary"></dl>
+    <h3>Top user agents</h3>
+    <ul id="stats-uas"></ul>
+    <form method="dialog"><button>Close</button></form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
