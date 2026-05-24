@@ -1,5 +1,6 @@
 package com.url_shortener.security;
 
+import com.url_shortener.ratelimit.RateLimitFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final CustomUserDetailsService userDetailsService;
 
     @Bean
@@ -57,17 +59,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         // Swagger / OpenAPI
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        // Static UI assets at the root
-                        .requestMatchers(HttpMethod.GET, "/", "/index.html", "/app.js", "/app.css", "/favicon.ico").permitAll()
                         // H2 console
                         .requestMatchers("/h2-console/**").permitAll()
+                        // Static UI assets at the root
+                        .requestMatchers(HttpMethod.GET, "/", "/index.html", "/app.js", "/app.css", "/favicon.ico").permitAll()
                         // Authenticated namespace
                         .requestMatchers("/api/me/**").authenticated()
                         // Root-level redirect path: GET /{shortCode} (any single segment) — public
                         .requestMatchers(HttpMethod.GET, "/*").permitAll()
                         // Everything else: authenticated
                         .anyRequest().authenticated())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(rateLimitFilter, JwtAuthenticationFilter.class);
         return http.build();
     }
 }

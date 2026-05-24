@@ -11,13 +11,14 @@ import org.springframework.core.Ordered;
 public class RateLimitConfig {
 
     @Bean
-    public FilterRegistrationBean<RateLimitFilter> rateLimitFilterRegistration(RateLimitProperties props) {
-        FilterRegistrationBean<RateLimitFilter> reg = new FilterRegistrationBean<>(new RateLimitFilter(props));
-        reg.addUrlPatterns("/api/shorten");
-        reg.setOrder(Ordered.HIGHEST_PRECEDENCE);  // run before Spring Security filter chain
+    public RateLimitFilter rateLimitFilter(RateLimitProperties props) {
+        return new RateLimitFilter(props);
+    }
+
+    @Bean
+    public FilterRegistrationBean<RateLimitFilter> rateLimitFilterRegistration(RateLimitFilter filter) {
+        FilterRegistrationBean<RateLimitFilter> reg = new FilterRegistrationBean<>(filter);
+        reg.setEnabled(false);
         return reg;
     }
 }
-
-
-

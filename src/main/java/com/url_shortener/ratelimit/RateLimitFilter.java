@@ -33,8 +33,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
-        String key = clientKey(request);
-        Bucket bucket = buckets.computeIfAbsent(key, k -> newBucket());
+        Long userId = (Long) request.getAttribute("authUserId");
+        boolean authenticated = userId != null;
+        String key = authenticated ? "u:" + userId : "ip:" + clientIp(request);
+        int rpm = authenticated
+                ? properties.getAuthenticated().getRequestsPerMinute()
+                : properties.getPublic().getRequestsPerMinute();
+        Bucket bucket = buckets.computeIfAbsent(key, k -> newBucket(rpm));
 
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
         if (probe.isConsumed()) {
@@ -51,8 +56,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         response.getWriter().write("{\"error\":\"Too Many Requests\",\"retryAfterSeconds\":" + retryAfterSeconds + "}");
     }
 
-    private Bucket newBucket() {
-        int rpm = properties.getPublic().getRequestsPerMinute();
+    private Bucket newBucket(int rpm) {
         Bandwidth limit = Bandwidth.builder()
                 .capacity(rpm)
                 .refillGreedy(rpm, Duration.ofMinutes(1))
@@ -60,7 +64,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         return Bucket.builder().addLimit(limit).build();
     }
 
-    private static String clientKey(HttpServletRequest request) {
+    private static String clientIp(HttpServletRequest request) {
         String forwarded = request.getHeader("X-Forwarded-For");
         if (forwarded != null && !forwarded.isBlank()) {
             int comma = forwarded.indexOf(',');

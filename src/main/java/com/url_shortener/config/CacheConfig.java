@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
@@ -18,15 +19,42 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 import java.time.Duration;
+import java.util.Map;
 
 @Slf4j
 @Configuration
 @EnableCaching
 public class CacheConfig implements CachingConfigurer {
 
+    /** Short-lived cache for "this short code does not exist" sentinels. */
+    public static final String NOT_FOUND_CACHE = "url-not-found";
+
     @Bean
     public RedisCacheConfiguration redisCacheConfiguration() {
-        ObjectMapper mapper = new ObjectMapper()
+        return RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(1))
+                .disableCachingNullValues()
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
+                        new GenericJackson2JsonRedisSerializer(jacksonMapper())));
+    }
+
+    /**
+     * Per-cache overrides. The negative cache holds short-lived sentinel strings
+     * for unknown short codes; 60s is enough to absorb bots scraping random
+     * codes without delaying legitimate creates noticeably.
+     */
+    @Bean
+    public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
+        RedisCacheConfiguration notFound = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofSeconds(60))
+                .disableCachingNullValues()
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
+                        new GenericJackson2JsonRedisSerializer(jacksonMapper())));
+        return builder -> builder.withInitialCacheConfigurations(Map.of(NOT_FOUND_CACHE, notFound));
+    }
+
+    private ObjectMapper jacksonMapper() {
+        return new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY)
@@ -35,12 +63,6 @@ public class CacheConfig implements CachingConfigurer {
                                 .allowIfBaseType(Object.class)
                                 .build(),
                         ObjectMapper.DefaultTyping.NON_FINAL);
-
-        return RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofHours(1))
-                .disableCachingNullValues()
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
-                        new GenericJackson2JsonRedisSerializer(mapper)));
     }
 
     /**
@@ -65,3 +87,4 @@ public class CacheConfig implements CachingConfigurer {
         };
     }
 }
+
